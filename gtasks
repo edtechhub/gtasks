@@ -3,6 +3,7 @@
 import argparse
 
 from tasks.authenticate import authenticate
+from tasks.backup import backup
 
 
 def main():
@@ -31,12 +32,12 @@ def main():
 
 
 def authenticate_hook(args):
-    print("Authenticating!")
     authenticate()
 
 
 def backup_hook(args):
     print("Backing up!")
+    backup()
 
 
 def process_hook(args):
