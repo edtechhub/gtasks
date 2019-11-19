@@ -1,35 +1,38 @@
 """In charge of creating a backup of all Google Tasks on the current account."""
+from pprint import pprint
+import os
+import json
+
 from gtasks import Gtasks
 
 
 def backup():
-    # Find all the tasks. (Do I want completed ones?)
-    # Loop through them and store.
-
-    # Need a structure for the nested tasks.
     g = Gtasks()
     lists = g.get_lists()
 
-    print("Have the lists: ", lists)
     content = [_serialize_list(l) for l in lists]
     _backup_to_file(content)
 
 
 def _serialize_list(task_list):
-    print("Backing up list")
-
+    # Appears to be a bug in get_tasks() where we don't get completed tasks. `include_completed` param doesn't work.
     list_of_tasks = _organize_tasks(task_list.get_tasks())
-    # Pick out more info here.
+
     return {
+        "id": task_list.id,
         "title": task_list.title,
+        "updated": task_list._dict["updated"],
         "tasks": [_serialize_task(task) for task in list_of_tasks],
     }
 
 
 def _serialize_task(task):
-    # Pick out more info here.
     return {
+        "id": task.id,
         "title": task.title,
+        "notes": task.notes,
+        "updated": task._dict["updated"],
+        "is_completed": task.complete,
         "sub_tasks": [_serialize_task(sub_task) for sub_task in task.sub_tasks]
     }
 
@@ -58,9 +61,22 @@ def _organize_tasks(tasks):
     return parents
 
 
-def _backup_to_file(backup_content_dict):
-    # Convert to jsonstring.
-    # Write to file.
-    # Probably a fixed file at this stage, and not letting the user choose.
-    print("Backing up to file: noop")
-    pass
+def _find_available_filename(filename):
+    original_filename = filename.format("")
+    if os.path.exists(original_filename):
+        counter = 1
+
+        incremented_filename = filename.format(counter)
+        while os.path.exists(incremented_filename):
+            counter += 1
+            incremented_filename = filename.format(counter)
+        return incremented_filename
+    else:
+        return original_filename
+
+
+def _backup_to_file(backup_content):
+    filename = _find_available_filename("backup{}.json")
+    print("Creating backup in file: {}".format(filename))
+    with open(filename, "w") as f:
+        json.dump(backup_content, f, sort_keys=True, indent=4)

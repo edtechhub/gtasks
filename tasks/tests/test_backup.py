@@ -34,6 +34,7 @@ class TestBackupOrganizeTasks(unittest.TestCase):
         assert parent.sub_tasks == [child]
 
     def test_chain_of_three(self):
+        # In the real app it looks like you can only nest one level deep?
         grandparent = self.task()
         grandparent.id = "grandparent"
 
