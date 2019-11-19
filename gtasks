@@ -4,10 +4,39 @@ import argparse
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--foo', help='foo help')
+    parser = argparse.ArgumentParser(prog="gtasks")
+    subparsers = parser.add_subparsers(dest="command")
+
+    authenticate = subparsers.add_parser(
+        'authenticate', help='Authenticate the use of your google account for access to the google task APIs'
+    )
+    authenticate.set_defaults(func=authenticate)
+
+    backup = subparsers.add_parser(
+        'backup', help='Backup your tasks to a local JSON file'
+    )
+    backup.set_defaults(func=backup)
+
+    process = subparsers.add_parser(
+        'process', help='Search Tasks and perform actions on them'
+    )
+    process.set_defaults(func=process)
+    subparsers.required = True
+
     args = parser.parse_args()
-    print("Args: ", args)
+    args.func()
+
+
+def authenticate(args):
+    print("Authenticating!")
+
+
+def backup(args):
+    print("Backing up!")
+
+
+def process(args):
+    print("Processing!")
 
 
 if __name__ == '__main__':
