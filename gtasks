@@ -2,6 +2,8 @@
 """Main script to act as an entry point and parse any args."""
 import argparse
 
+from tasks.authenticate import authenticate
+
 
 def main():
     parser = argparse.ArgumentParser(prog="gtasks")
@@ -11,32 +13,33 @@ def main():
     authenticate = subparsers.add_parser(
         'authenticate', help='Authenticate the use of your google account for access to the google task APIs'
     )
-    authenticate.set_defaults(func=authenticate)
+    authenticate.set_defaults(func=authenticate_hook)
 
     backup = subparsers.add_parser(
         'backup', help='Backup your tasks to a local JSON file'
     )
-    backup.set_defaults(func=backup)
+    backup.set_defaults(func=backup_hook)
 
     process = subparsers.add_parser(
         'process', help='Search Tasks and perform actions on them'
     )
-    process.set_defaults(func=process)
+    process.set_defaults(func=process_hook)
     # Add the more complicated options here for process.
 
     args = parser.parse_args()
-    args.func()
+    args.func(args)
 
 
-def authenticate(args):
+def authenticate_hook(args):
     print("Authenticating!")
+    authenticate()
 
 
-def backup(args):
+def backup_hook(args):
     print("Backing up!")
 
 
-def process(args):
+def process_hook(args):
     print("Processing!")
 
 
