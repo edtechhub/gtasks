@@ -1,5 +1,4 @@
 """In charge of creating a backup of all Google Tasks on the current account."""
-from pprint import pprint
 import os
 import json
 
@@ -15,7 +14,8 @@ def backup():
 
 
 def _serialize_list(task_list):
-    # Appears to be a bug in get_tasks() where we don't get completed tasks. `include_completed` param doesn't work.
+    # If we want completed/hidden tasks use `include_hidden=True`.
+    # Can also get deleted tasks with `include_deleted=True`, but they are less interesting.
     list_of_tasks = _organize_tasks(task_list.get_tasks())
 
     return {
