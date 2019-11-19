@@ -8,8 +8,8 @@ from tasks.backup import backup
 
 def main():
     parser = argparse.ArgumentParser(prog="gtasks")
+    parser.set_defaults(func=lambda _: parser.print_help())
     subparsers = parser.add_subparsers(dest="command")
-    subparsers.required = True
 
     authenticate = subparsers.add_parser(
         'authenticate', help='Authenticate the use of your google account for access to the google task APIs'
