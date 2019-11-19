@@ -15,26 +15,27 @@ def backup():
     _backup_to_file(content)
 
 
-def _serialize_list(list):
+def _serialize_list(task_list):
     print("Backing up list")
-    # Group them so that they have sub_tasks now, instead of being flat.
-    tasks = _serialize_tasks()
+
+    list_of_tasks = _organize_tasks(task_list.get_tasks())
+    # Pick out more info here.
     return {
-        "name": "test",
-        "tasks": tasks,
+        "title": task_list.title,
+        "tasks": [_serialize_task(task) for task in list_of_tasks],
     }
 
 
-def _serialize_tasks():
-    return []
-
-
 def _serialize_task(task):
-    return {}
+    # Pick out more info here.
+    return {
+        "title": task.title,
+        "sub_tasks": [_serialize_task(sub_task) for sub_task in task.sub_tasks]
+    }
 
 
-def _organize_children(tasks):
-    # Might need this for the `process` as well, so might need to move somewhere else.
+def _organize_tasks(tasks):
+    """Shuffles a flat list of tasks into tasks that have a `sub_tasks` property."""
     parents = []
     orphans = []
     for task in tasks:
@@ -42,7 +43,6 @@ def _organize_children(tasks):
         if task.parent is None:
             parents.append(task)
         else:
-            print("Task is orphan!")
             orphans.append(task)
 
     def _find_and_assign_task_to_parent(l, parent_id, task):
@@ -62,4 +62,5 @@ def _backup_to_file(backup_content_dict):
     # Convert to jsonstring.
     # Write to file.
     # Probably a fixed file at this stage, and not letting the user choose.
+    print("Backing up to file: noop")
     pass
