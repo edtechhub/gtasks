@@ -4,6 +4,7 @@ import argparse
 
 from tasks.authenticate import authenticate
 from tasks.backup import backup
+from tasks.process import process
 
 
 def main():
@@ -25,7 +26,48 @@ def main():
         'process', help='Search Tasks and perform actions on them'
     )
     process.set_defaults(func=process_hook)
-    # Add the more complicated options here for process.
+    process.add_argument(
+        '--list', action="store", dest="list", required=True, help="The list to look for tasks in."
+    )
+    process.add_argument(
+        '--match',
+        action="store",
+        dest="match",
+        required=False,
+        help="The search term to look for in task titles as a filter."
+    )
+    process.add_argument(
+        '--pipeto',
+        action="store",
+        dest="pipeto",
+        required=False,
+        help=(
+            "The script to pipe the content of the task to. Must be available to run "
+            "directly from this scipt. i.e on your PATH. E.g `myscript.sh`"
+        )
+    )
+    # Means don't prompt to pipe into the script if no.
+    process.add_argument(
+        '--interactive',
+        action="store",
+        dest="interactive",
+        required=False,
+        help=(
+            "If no, just lists the matching tasks. If yes, will prompt about piping "
+            "to scipt and descending to subtasks or not"
+        ),
+        choices=["yes", "no"],
+        default="yes",
+    )
+    process.add_argument(
+        '--action',
+        action="store",
+        dest="action",
+        required=False,
+        help="Whether to mark the tasks as done or not after processing them in interactive mode.",
+        choices=["markdone", "none"],
+        default="none",
+    )
 
     args = parser.parse_args()
     args.func(args)
@@ -42,6 +84,7 @@ def backup_hook(args):
 
 def process_hook(args):
     print("Processing!")
+    process()
 
 
 if __name__ == '__main__':
