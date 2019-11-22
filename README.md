@@ -6,7 +6,19 @@ A command line application to integrate with Google Tasks and perform some commo
 
 To see usage options run:
 ```
-gtask -h
+$ gtask -h
+
+usage: gtasks [-h] {authenticate,backup,process} ...
+
+positional arguments:
+  {authenticate,backup,process}
+    authenticate        Authenticate the use of your google account for access
+                        to the google task APIs
+    backup              Backup your tasks to a local JSON file
+    process             Search Tasks and perform actions on them
+
+optional arguments:
+  -h, --help            show this help message and exit
 ```
 
 Further documentation on usage TBD.
