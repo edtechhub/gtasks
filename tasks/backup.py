@@ -1,22 +1,29 @@
 """In charge of creating a backup of all Google Tasks on the current account."""
-import os
+from datetime import datetime
 import json
 
 from gtasks import Gtasks
 
 
-def backup():
+def backup(include):
+    if include == "all":
+        include_hidden = True
+    elif include == "visible":
+        include_hidden = False
+    else:
+        include_hidden = True
+
     g = Gtasks()
     lists = g.get_lists()
 
-    content = [_serialize_list(l) for l in lists]
+    print(f"Including hidden tasks" if include else "Not including hidden tasks")
+    content = [_serialize_list(l, include_hidden) for l in lists]
     _backup_to_file(content)
 
 
-def _serialize_list(task_list):
-    # If we want completed/hidden tasks use `include_hidden=True`.
-    # Can also get deleted tasks with `include_deleted=True`, but they are less interesting.
-    list_of_tasks = _organize_tasks(task_list.get_tasks())
+def _serialize_list(task_list, include_hidden):
+    print(f"Adding list to backup: {task_list.title}")
+    list_of_tasks = _organize_tasks(task_list.get_tasks(include_hidden=include_hidden))
 
     return {
         "id": task_list.id,
@@ -61,22 +68,9 @@ def _organize_tasks(tasks):
     return parents
 
 
-def _find_available_filename(filename):
-    original_filename = filename.format("")
-    if os.path.exists(original_filename):
-        counter = 1
-
-        incremented_filename = filename.format(counter)
-        while os.path.exists(incremented_filename):
-            counter += 1
-            incremented_filename = filename.format(counter)
-        return incremented_filename
-    else:
-        return original_filename
-
-
 def _backup_to_file(backup_content):
-    filename = _find_available_filename("backup{}.json")
+    now_string = datetime.now().isoformat()
+    filename = f"backup-{now_string}.json"
     print("Creating backup in file: {}".format(filename))
     with open(filename, "w") as f:
         json.dump(backup_content, f, sort_keys=True, indent=4)

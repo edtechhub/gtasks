@@ -21,6 +21,19 @@ def main():
         'backup', help='Backup your tasks to a local JSON file'
     )
     backup.set_defaults(func=backup_hook)
+    backup.add_argument(
+        '--include',
+        action="store",
+        dest="include",
+        required=False,
+        choices=["all", "visible"],
+        default="all",
+        help=(
+            "What tasks to include in the backup. All will include completed hidden "
+            "tasks. Visible will just include tasks which have not been completed yet. "
+            "Default: all"
+        )
+    )
 
     process = subparsers.add_parser(
         'process', help='Search Tasks and perform actions on them'
@@ -54,7 +67,7 @@ def main():
         required=False,
         help=(
             "If no, just lists the matching tasks. If yes, will prompt about piping "
-            "to scipt and descending to subtasks or not"
+            "to scipt and descending to subtasks or not. Default: yes"
         ),
         choices=["yes", "no"],
         default="yes",
@@ -64,7 +77,10 @@ def main():
         action="store",
         dest="action",
         required=False,
-        help="Whether to mark the tasks as done or not after processing them in interactive mode.",
+        help=(
+            "Whether to mark the tasks as done or not after processing them in "
+            "interactive mode. Default: none"
+        ),
         choices=["markdone", "none"],
         default="none",
     )
@@ -79,11 +95,12 @@ def authenticate_hook(args):
 
 def backup_hook(args):
     print("Backing up!")
-    backup()
+    backup(args.include)
 
 
 def process_hook(args):
     print("Processing!")
+    print(args)
     process()
 
 
