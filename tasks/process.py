@@ -8,10 +8,6 @@ from .backup import _organize_tasks, _serialize_task
 
 def process(target_list, match, interactive, action, pipeto):
     print()
-    print("Debug Interactive: ", interactive)
-    print("Debug Action: ", action)
-    print("Debug Pipeto: ", pipeto)
-    print()
 
     interactive = True if interactive == "yes" else False
 
