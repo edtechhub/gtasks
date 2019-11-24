@@ -20,7 +20,7 @@ def backup(include):
     content = []
     for l in lists:
         print(f"Adding list to backup: {l.title}")
-        content.append(_serialize_list(l, include_hidden=include_hidden))
+        content.append(_serialize_list(l, include_hidden=include_hidden, include_completed=include_hidden))
     _backup_to_file(content)
 
 

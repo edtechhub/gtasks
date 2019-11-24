@@ -22,7 +22,7 @@ def process(target_list, match, interactive, action, pipeto):
 
     print("List: ", list_.title)
 
-    tasks = list_.get_tasks()
+    tasks = list_.get_tasks(include_completed=False)
     tasks = _organize_tasks(tasks)
 
     if match is not None:
@@ -64,7 +64,7 @@ def _interactive(tasks, actionator, piper):
             for sub in t.sub_tasks:
                 print("--")
                 print(f"Task {i}")
-                _print_single_task(t, ignore_sub_tasks=True)
+                _print_single_task(sub, ignore_sub_tasks=True)
                 answer = _present_options(sub, piper)
                 if answer == "y":
                     content = _serialize_task(sub)
