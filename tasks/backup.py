@@ -17,12 +17,14 @@ def backup(include):
     lists = g.get_lists()
 
     print(f"Including hidden tasks" if include else "Not including hidden tasks")
-    content = [_serialize_list(l, include_hidden) for l in lists]
+    content = []
+    for l in lists:
+        print(f"Adding list to backup: {l.title}")
+        content.append(_serialize_list(l, include_hidden=include_hidden))
     _backup_to_file(content)
 
 
-def _serialize_list(task_list, include_hidden):
-    print(f"Adding list to backup: {task_list.title}")
+def _serialize_list(task_list, include_hidden=False):
     list_of_tasks = _organize_tasks(task_list.get_tasks(include_hidden=include_hidden))
 
     return {

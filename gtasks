@@ -100,7 +100,7 @@ def backup_hook(args):
 
 def process_hook(args):
     print("Processing!")
-    process(args.target_list, args.match)
+    process(args.target_list, args.match, args.interactive, args.action, args.pipeto)
 
 
 if __name__ == '__main__':
