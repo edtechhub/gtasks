@@ -35,7 +35,10 @@ Clone the repository:
 git clone git@github.com:edtechhub/gtasks.git
 ```
 Install the dependencies (preferably in a virtual environment):
+
+We require a two stage install, as the Gtasks installer itself requires some dependencies.
 ```
+pip install -r pre-requirements.txt
 pip install -r requirements.txt
 ```
 
