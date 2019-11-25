@@ -20,12 +20,14 @@ def backup(include):
     content = []
     for l in lists:
         print(f"Adding list to backup: {l.title}")
-        content.append(_serialize_list(l, include_hidden=include_hidden, include_completed=include_hidden))
+        content.append(_serialize_list(l, include_hidden=include_hidden))
     _backup_to_file(content)
 
 
 def _serialize_list(task_list, include_hidden=False):
-    list_of_tasks = _organize_tasks(task_list.get_tasks(include_hidden=include_hidden))
+    list_of_tasks = _organize_tasks(
+        task_list.get_tasks(include_hidden=include_hidden, include_completed=include_hidden)
+    )
 
     return {
         "id": task_list.id,
