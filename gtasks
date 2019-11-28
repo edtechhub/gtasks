@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""Main script to act as an entry point and parse any args."""
+import argparse
+
+from tasks.authenticate import authenticate
+from tasks.backup import backup
+from tasks.process import process
+
+
+def main():
+    parser = argparse.ArgumentParser(prog="gtasks")
+    parser.set_defaults(func=lambda _: parser.print_help())
+    subparsers = parser.add_subparsers(dest="command")
+
+    authenticate = subparsers.add_parser(
+        'authenticate', help='Authenticate the use of your google account for access to the google task APIs'
+    )
+    authenticate.set_defaults(func=authenticate_hook)
+
+    backup = subparsers.add_parser(
+        'backup', help='Backup your tasks to a local JSON file'
+    )
+    backup.set_defaults(func=backup_hook)
+    backup.add_argument(
+        '--include',
+        action="store",
+        dest="include",
+        required=False,
+        choices=["all", "visible"],
+        default="all",
+        help=(
+            "What tasks to include in the backup. All will include completed hidden "
+            "tasks. Visible will just include tasks which have not been completed yet. "
+            "Default: all"
+        )
+    )
+
+    process = subparsers.add_parser(
+        'process', help='Search Tasks and perform actions on them'
+    )
+    process.set_defaults(func=process_hook)
+    process.add_argument(
+        '--list', action="store", dest="target_list", required=True, help="The list to look for tasks in."
+    )
+    process.add_argument(
+        '--match',
+        action="store",
+        dest="match",
+        required=False,
+        help="The search term to look for in task titles as a filter."
+    )
+    process.add_argument(
+        '--pipeto',
+        action="store",
+        dest="pipeto",
+        required=False,
+        help=(
+            "The script to pipe the content of the task to. Must be available to run "
+            "directly from this scipt. i.e on your PATH. E.g `myscript.sh`"
+        )
+    )
+    # Means don't prompt to pipe into the script if no.
+    process.add_argument(
+        '--interactive',
+        action="store",
+        dest="interactive",
+        required=False,
+        help=(
+            "If yes, will ask for confirmation before performing actions. If no, will "
+            "proceed with actions without asking."
+        ),
+        choices=["yes", "no"],
+        default="yes",
+    )
+    process.add_argument(
+        '--action',
+        action="store",
+        dest="action",
+        required=False,
+        help=(
+            "Whether to mark the tasks as done or not after processing them in "
+            "interactive mode. Default: none"
+        ),
+        choices=["markdone", "none"],
+        default="none",
+    )
+
+    args = parser.parse_args()
+    args.func(args)
+
+
+def authenticate_hook(args):
+    authenticate()
+
+
+def backup_hook(args):
+    print("Backing up!")
+    backup(args.include)
+
+
+def process_hook(args):
+    print("Processing!")
+    process(args.target_list, args.match, args.interactive, args.action, args.pipeto)
+
+
+if __name__ == '__main__':
+    main()
