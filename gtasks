@@ -23,6 +23,9 @@ def main():
     )
     backup.set_defaults(func=backup_hook)
     backup.add_argument(
+        '--list', action="store", dest="target_list", help="Only back up the given list."
+    )
+    backup.add_argument(
         '--include',
         action="store",
         dest="include",
@@ -107,7 +110,7 @@ def authenticate_hook(args):
 
 def backup_hook(args):
     print("Backing up!")
-    backup(args.include)
+    backup(args.target_list, args.include)
 
 
 def process_hook(args):

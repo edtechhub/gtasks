@@ -5,7 +5,7 @@ import json
 from gtasks import Gtasks
 
 
-def backup(include):
+def backup(target_list, include):
     if include == "all":
         include_hidden = True
     elif include == "visible":
@@ -15,6 +15,15 @@ def backup(include):
 
     g = Gtasks()
     lists = g.get_lists()
+    if target_list:
+        original_count = len(lists)
+        lists = [l for l in lists if l.title.lower() == target_list.lower()]
+        new_count = len(lists)
+        if not lists:
+            print(f"Could not find any lists with the name '{target_list}' to backup!")
+            return
+        else:
+            print(f"Backing up {new_count} of {original_count} lists.")
 
     print(f"Including hidden tasks" if include_hidden else "Not including hidden tasks")
     content = []
