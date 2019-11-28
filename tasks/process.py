@@ -53,7 +53,7 @@ def _interactive(tasks, actionator, piper):
         if t.sub_tasks:
             print("Number of Sub Tasks:", len(t.sub_tasks))
 
-        answer = _present_options(t, piper)
+        answer = _present_options(t, actionator, piper)
         print()
 
         if answer == "e":
@@ -70,17 +70,21 @@ def _interactive(tasks, actionator, piper):
                     pass
         elif answer == "y":
             content = _serialize_task(t)
-            piper.pipe(content)
+            if piper:
+                piper.pipe(content)
             actionator.take_action(t)
         elif answer == "n":
             pass
 
 
-def _present_options(task, piper):
+def _present_options(task, actionator, piper):
     options = {"n"}
     print()
     if piper:
         print(f"Perform action '{piper.script}' (y)?")
+        options.add("y")
+    elif actionator.action_type == "markdone":
+        print(f"Perform action 'markdone' (y)?")
         options.add("y")
     print("Advance to next item (n)?")
     if task.sub_tasks:
