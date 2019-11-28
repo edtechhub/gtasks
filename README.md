@@ -8,15 +8,16 @@ To see usage options run:
 ```
 $ gtasks -h
 
-usage: gtasks [-h] {authenticate,backup,process,quickadd} ...
+usage: gtasks [-h] {authenticate,backup,process,quickadd,lists} ...
 
 positional arguments:
-  {authenticate,backup,process,quickadd}
+  {authenticate,backup,process,quickadd,lists}
     authenticate        Authenticate the use of your google account for access
                         to the google task APIs
     backup              Backup your tasks to a local JSON file
     process             Search Tasks and perform actions on them
     quickadd            Quickly add a task to a given list
+    lists               Display all of your Google Tasks Lists.
 
 optional arguments:
   -h, --help            show this help message and exit
