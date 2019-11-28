@@ -16,7 +16,7 @@ def backup(include):
     g = Gtasks()
     lists = g.get_lists()
 
-    print(f"Including hidden tasks" if include else "Not including hidden tasks")
+    print(f"Including hidden tasks" if include_hidden else "Not including hidden tasks")
     content = []
     for l in lists:
         print(f"Adding list to backup: {l.title}")
