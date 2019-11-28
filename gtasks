@@ -6,6 +6,7 @@ from tasks.authenticate import authenticate
 from tasks.backup import backup
 from tasks.process import process
 from tasks.quick_add import quick_add
+from tasks.lists import lists
 
 
 def main():
@@ -100,6 +101,11 @@ def main():
         action="store", dest="title", help="The title of the new task."
     )
 
+    quick_add = subparsers.add_parser(
+        'lists', help='Display all of your Google Tasks Lists.'
+    )
+    quick_add.set_defaults(func=lists_hook)
+
     args = parser.parse_args()
     args.func(args)
 
@@ -121,6 +127,10 @@ def process_hook(args):
 def quick_add_hook(args):
     print("Adding Task!")
     quick_add(args.target_list, args.title)
+
+
+def lists_hook(args):
+    lists()
 
 
 if __name__ == '__main__':
