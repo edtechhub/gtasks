@@ -5,6 +5,7 @@ import argparse
 from tasks.authenticate import authenticate
 from tasks.backup import backup
 from tasks.process import process
+from tasks.quick_add import quick_add
 
 
 def main():
@@ -85,6 +86,17 @@ def main():
         default="none",
     )
 
+    quick_add = subparsers.add_parser(
+        'quickadd', help='Quickly add a task to a given list'
+    )
+    quick_add.set_defaults(func=quick_add_hook)
+    quick_add.add_argument(
+        '--list', action="store", dest="target_list", required=True, help="The list to add the task to."
+    )
+    quick_add.add_argument(
+        action="store", dest="title", help="The title of the new task."
+    )
+
     args = parser.parse_args()
     args.func(args)
 
@@ -101,6 +113,11 @@ def backup_hook(args):
 def process_hook(args):
     print("Processing!")
     process(args.target_list, args.match, args.interactive, args.action, args.pipeto)
+
+
+def quick_add_hook(args):
+    print("Adding Task!")
+    quick_add(args.target_list, args.title)
 
 
 if __name__ == '__main__':
