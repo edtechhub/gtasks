@@ -6,10 +6,11 @@ from gtasks import Gtasks
 from .backup import _organize_tasks, _serialize_task
 
 
-def process(target_list, match, interactive, action, pipeto):
+def process(target_list, match, interactive, action, pipeto, pipe_separately="no"):
     print()
 
     interactive = True if interactive == "yes" else False
+    pipe_separately = True if pipe_separately == "yes" else False
 
     list_ = _find_list_with_name(target_list)
 
@@ -34,13 +35,7 @@ def process(target_list, match, interactive, action, pipeto):
     if interactive:
         _interactive(tasks, actionator, piper)
     else:
-        _non_interactive(tasks, actionator, piper)
-    # Interactive or not, split here:
-    # Maybe into functions?
-
-    # Send stuff to being processed.
-
-    # No interactive, just go through them all.
+        _non_interactive(tasks, actionator, piper, pipe_separately)
 
     print("Done processing!")
 
@@ -100,7 +95,7 @@ def _present_options(task, actionator, piper):
     return answer
 
 
-def _non_interactive(tasks, actionator, piper):
+def _non_interactive(tasks, actionator, piper, pipe_separately: bool):
     for i, t in enumerate(tasks):
         print("--")
         print(f"Task {i}")
@@ -108,8 +103,15 @@ def _non_interactive(tasks, actionator, piper):
         actionator.take_action(t)
 
     if piper:
-        content = [_serialize_task(t) for t in tasks]
-        piper.pipe(content)
+        if pipe_separately:
+            # Pipe X times for X tasks.
+            for t in tasks:
+                content = _serialize_task(t)
+                piper.pipe(content)
+        else:
+            # Pipe once for each task.
+            content = [_serialize_task(t) for t in tasks]
+            piper.pipe(content)
     print()
 
 

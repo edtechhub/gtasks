@@ -89,6 +89,19 @@ def main():
         choices=["markdone", "none"],
         default="none",
     )
+    process.add_argument(
+        '--pipe-separately',
+        action="store",
+        dest="pipe_separately",
+        required=False,
+        help=(
+            "When piping tasks to something with --pipeto, in non-interactive mode, "
+            "whether the script should be piped and executed once per task or not. "
+            "Default is no, and piped just once all together."
+        ),
+        choices=["yes", "no"],
+        default="no",
+    )
 
     quick_add = subparsers.add_parser(
         'quickadd', help='Quickly add a task to a given list'
@@ -121,7 +134,14 @@ def backup_hook(args):
 
 def process_hook(args):
     print("Processing!")
-    process(args.target_list, args.match, args.interactive, args.action, args.pipeto)
+    process(
+        args.target_list,
+        args.match,
+        args.interactive,
+        args.action,
+        args.pipeto,
+        args.pipe_separately
+    )
 
 
 def quick_add_hook(args):
