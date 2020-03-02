@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock
 
-from tasks.backup import _organize_tasks
+from tasks.backup import _organize_tasks, _serialize_task
 
 
 class TestBackupOrganizeTasks(unittest.TestCase):
@@ -9,6 +9,8 @@ class TestBackupOrganizeTasks(unittest.TestCase):
     def task(self):
         task = Mock()
         task.parent = None
+        task._dict = {"updated": None}
+        task.sub_tasks = []
         return task
 
     def test_empty(self):
@@ -64,3 +66,12 @@ class TestBackupOrganizeTasks(unittest.TestCase):
         assert len(orged) == 1
         parent, = orged
         assert parent.sub_tasks == [child1, child2]
+
+    def test_serialize_due_date_if_present(self):
+        t = self.task()
+        t._dict["due"] = "2020-03-02T00:00:00.000Z"
+        assert _serialize_task(t)["due"] == "2020-03-02T00:00:00.000Z"
+
+    def test_serialize_due_date_if_missing(self):
+        t = self.task()
+        assert _serialize_task(t)["due"] is None
