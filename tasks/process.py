@@ -6,7 +6,15 @@ from gtasks import Gtasks
 from .backup import _organize_tasks, _serialize_task
 
 
-def process(target_list, match, interactive, action, pipeto, pipe_separately="no"):
+def process(
+    target_list,
+    match,
+    interactive,
+    action,
+    pipeto,
+    pipe_separately="no",
+    match_mode="default"
+):
     print()
 
     interactive = True if interactive == "yes" else False
@@ -24,7 +32,7 @@ def process(target_list, match, interactive, action, pipeto, pipe_separately="no
 
     if match is not None:
         print("Filtering tasks by term: ", match)
-        tasks = _filter_tasks(tasks, match)
+        tasks = _filter_tasks(tasks, match, match_strategy)
 
     if not tasks:
         print("Did not find any tasks!")
@@ -152,7 +160,7 @@ def _print_single_task(task, ignore_sub_tasks=False):
             print(f"{indent}Last Updated: ", sub_task._dict["updated"])
 
 
-def _filter_tasks(tasks, match):
+def _filter_tasks(tasks, match, strategy="default"):
     """Filter out tasks based on title and description for the given string.
 
     If a parent doesn't match, the subtasks are ignored.
@@ -160,10 +168,30 @@ def _filter_tasks(tasks, match):
     def is_match(task, term):
         return term in task.title.lower() or (task.notes and term in task.notes.lower())
 
+    def default(tasks):
+        tasks = [t for t in tasks if is_match(t, match)]
+        for t in tasks:
+            t.sub_tasks = [t for t in t.sub_tasks if is_match(t, match)]
+        return tasks
+
+    def parent_match(tasks):
+        """Just check the parents, don't filter children."""
+        tasks = [t for t in tasks if is_match(t, match)]
+        return tasks
+
+    strategies = {
+        "default": default,
+        "parent-match": parent_match,
+    }
+    filterer = strategies.get(strategy)
+
+    if not filterer:
+        raise ValueError(
+            f"Could not find matching matching strategy for provided value: {strategy}"
+        )
+
     match = match.lower()
-    tasks = [t for t in tasks if is_match(t, match)]
-    for t in tasks:
-        t.sub_tasks = [t for t in t.sub_tasks if is_match(t, match)]
+    tasks = filterer(tasks)
 
     return tasks
 
