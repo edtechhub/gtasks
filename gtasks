@@ -102,6 +102,19 @@ def main():
         choices=["yes", "no"],
         default="no",
     )
+    process.add_argument(
+        '--match-mode',
+        action="store",
+        dest="match_mode",
+        required=False,
+        help=(
+            "Strategy to take when matching against the --match argument. Modes - "
+            "default: Match against each task and sub-task individually.\n"
+            "parent-match: Only compare to parents. If the parents match, include all sub-tasks.\n"
+        ),
+        choices=["default", "parent-match"],
+        default="default",
+    )
 
     quick_add = subparsers.add_parser(
         'quickadd', help='Quickly add a task to a given list'
@@ -140,7 +153,8 @@ def process_hook(args):
         args.interactive,
         args.action,
         args.pipeto,
-        args.pipe_separately
+        args.pipe_separately,
+        args.match_mode
     )
 
 
