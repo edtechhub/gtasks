@@ -32,7 +32,7 @@ def process(
 
     if match is not None:
         print("Filtering tasks by term: ", match)
-        tasks = _filter_tasks(tasks, match, match_strategy)
+        tasks = _filter_tasks(tasks, match, strategy=match_mode)
 
     if not tasks:
         print("Did not find any tasks!")
