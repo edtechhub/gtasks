@@ -5,6 +5,8 @@ import argparse
 from tasks.authenticate import authenticate
 from tasks.backup import backup
 from tasks.process import process
+from tasks.quick_add import quick_add
+from tasks.lists import lists
 
 
 def main():
@@ -21,6 +23,9 @@ def main():
         'backup', help='Backup your tasks to a local JSON file'
     )
     backup.set_defaults(func=backup_hook)
+    backup.add_argument(
+        '--list', action="store", dest="target_list", help="Only back up the given list."
+    )
     backup.add_argument(
         '--include',
         action="store",
@@ -84,6 +89,48 @@ def main():
         choices=["markdone", "none"],
         default="none",
     )
+    process.add_argument(
+        '--pipe-separately',
+        action="store",
+        dest="pipe_separately",
+        required=False,
+        help=(
+            "When piping tasks to something with --pipeto, in non-interactive mode, "
+            "whether the script should be piped and executed once per task or not. "
+            "Default is no, and piped just once all together."
+        ),
+        choices=["yes", "no"],
+        default="no",
+    )
+    process.add_argument(
+        '--match-mode',
+        action="store",
+        dest="match_mode",
+        required=False,
+        help=(
+            "Strategy to take when matching against the --match argument. Modes - "
+            "default: Match against each task and sub-task individually.\n"
+            "parent-match: Only compare to parents. If the parents match, include all sub-tasks.\n"
+        ),
+        choices=["default", "parent-match"],
+        default="default",
+    )
+
+    quick_add = subparsers.add_parser(
+        'quickadd', help='Quickly add a task to a given list'
+    )
+    quick_add.set_defaults(func=quick_add_hook)
+    quick_add.add_argument(
+        '--list', action="store", dest="target_list", required=True, help="The list to add the task to."
+    )
+    quick_add.add_argument(
+        action="store", dest="title", help="The title of the new task."
+    )
+
+    quick_add = subparsers.add_parser(
+        'lists', help='Display all of your Google Tasks Lists.'
+    )
+    quick_add.set_defaults(func=lists_hook)
 
     args = parser.parse_args()
     args.func(args)
@@ -95,12 +142,29 @@ def authenticate_hook(args):
 
 def backup_hook(args):
     print("Backing up!")
-    backup(args.include)
+    backup(args.target_list, args.include)
 
 
 def process_hook(args):
     print("Processing!")
-    process(args.target_list, args.match, args.interactive, args.action, args.pipeto)
+    process(
+        args.target_list,
+        args.match,
+        args.interactive,
+        args.action,
+        args.pipeto,
+        args.pipe_separately,
+        args.match_mode
+    )
+
+
+def quick_add_hook(args):
+    print("Adding Task!")
+    quick_add(args.target_list, args.title)
+
+
+def lists_hook(args):
+    lists()
 
 
 if __name__ == '__main__':
