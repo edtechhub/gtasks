@@ -1,6 +1,7 @@
 """In charge of creating a backup of all Google Tasks on the current account."""
 from datetime import datetime
 import json
+from unittest.mock import Mock
 
 from gtasks import Gtasks
 
@@ -59,16 +60,35 @@ def _serialize_task(task):
     }
 
 
+def fake_task():
+    t = Mock()
+    t.id = "ghost"
+    t.title = "ghost"
+    t.notes = "ghost notes"
+    t.complete = False
+    t.sub_tasks = []
+
+    t._dict = {"updated": "ghost"}
+    return t
+
+
 def _organize_tasks(tasks):
     """Shuffles a flat list of tasks into tasks that have a `sub_tasks` property."""
     parents = []
     orphans = []
+
+    ghost = fake_task()
+
     for task in tasks:
         task.sub_tasks = []
-        if task.parent is None:
-            parents.append(task)
-        else:
-            orphans.append(task)
+        try:
+            if task.parent is None:
+                parents.append(task)
+            else:
+                orphans.append(task)
+        except Exception:
+            print(f"Got error trying to find parent for task with ID: {task.id}, Title: {task.title}. Adding to ghost task.")
+            ghost.sub_tasks.append(task)
 
     def _find_and_assign_task_to_parent(l, parent_id, task):
         for t in l:
@@ -79,6 +99,9 @@ def _organize_tasks(tasks):
     for task in orphans:
         parent_id = task.parent.id
         _find_and_assign_task_to_parent(parents, parent_id, task)
+
+    if ghost.sub_tasks:
+        parents.append(ghost)
 
     return parents
 
