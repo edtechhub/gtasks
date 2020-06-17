@@ -36,22 +36,22 @@ def backup(target_list, include):
             print(f"Adding list to backup: {l.title}")
             unorganised_list_of_tasks = l.get_tasks(include_hidden=include_hidden,
                                                     include_completed=include_hidden)
-            content_unorganised = _serialize_list(unorganised_list_of_tasks)
+            content_unorganised = _serialize_list(l, unorganised_list_of_tasks)
             _backup_to_file("Unorganised_"+l.title, content_unorganised)
             content = _serialize_list(
-                _organize_tasks(unorganised_list_of_tasks))
+                _organize_tasks(l, unorganised_list_of_tasks))
             _backup_to_file("Organised_"+l.title, content)
         except Exception:
             print('Failed to add list to backup: {}'.format(l.title))
             traceback.print_exc()
 
 
-def _serialize_list(task_list):
+def _serialize_list(task_list, list_of_tasks):
     return {
         "id": task_list.id,
         "title": task_list.title,
         "updated": task_list._dict["updated"],
-        "tasks": [_serialize_task(task) for task in task_list],
+        "tasks": [_serialize_task(task) for task in list_of_tasks],
     }
 
 
