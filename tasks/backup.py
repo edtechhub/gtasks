@@ -5,15 +5,15 @@ from unittest.mock import Mock
 
 from gtasks import Gtasks
 
-
+# target_list: List to be backed up
+# include: which tasks to include
 def backup(target_list, include):
     if include == "all":
         include_hidden = True
     elif include == "visible":
         include_hidden = False
-    else:
-        include_hidden = True
-
+    print(f"Including hidden tasks" if include_hidden else "Not including hidden tasks")
+    # if target_list is specified, then modify 'lists'
     g = Gtasks()
     lists = g.get_lists()
     if target_list:
@@ -26,12 +26,15 @@ def backup(target_list, include):
         else:
             print(f"Backing up {new_count} of {original_count} lists.")
 
-    print(f"Including hidden tasks" if include_hidden else "Not including hidden tasks")
-    content = []
+    # Lists now contains either all lists or the targeted lists
+    # Get content for each list.new_count} of {original_count} lists.")
     for l in lists:
-        print(f"Adding list to backup: {l.title}")
-        content.append(_serialize_list(l, include_hidden=include_hidden))
-    _backup_to_file(content)
+        try:
+            print(f"Adding list to backup: {l.title}")
+            content = _serialize_list(l, include_hidden=include_hidden)
+            _backup_to_file(l.title, content)
+       except Exception:
+            print('Failed to add list to backup: {}'.format(l.title))
 
 
 def _serialize_list(task_list, include_hidden=False):
@@ -96,9 +99,12 @@ def _organize_tasks(tasks):
             if t.id == parent_id:
                 t.sub_tasks.append(task)
 
-    for task in orphans:
-        parent_id = task.parent.id
-        _find_and_assign_task_to_parent(parents, parent_id, task)
+        for task in orphans:
+            try:
+                parent_id = task.parent.id
+                _find_and_assign_task_to_parent(parents, parent_id, task)
+            except Exception:
+                print('Could not find parent for {}'.format(task.title))
 
     if ghost.sub_tasks:
         parents.append(ghost)
@@ -106,9 +112,9 @@ def _organize_tasks(tasks):
     return parents
 
 
-def _backup_to_file(backup_content):
+def _backup_to_file(file_name, backup_content):
     now_string = datetime.now().isoformat()
-    filename = f"backup-{now_string}.json"
+    filename = f"backup-{file_name}-{now_string}.json"
     print("Creating backup in file: {}".format(filename))
     with open(filename, "w") as f:
         json.dump(backup_content, f, sort_keys=True, indent=4)
