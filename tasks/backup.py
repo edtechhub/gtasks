@@ -33,7 +33,7 @@ def backup(target_list, include):
             print(f"Adding list to backup: {l.title}")
             content = _serialize_list(l, include_hidden=include_hidden)
             _backup_to_file(l.title, content)
-       except Exception:
+        except Exception:
             print('Failed to add list to backup: {}'.format(l.title))
 
 
