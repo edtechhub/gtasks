@@ -107,7 +107,6 @@ def _organize_tasks(tasks):
             traceback.print_exc()
             print(
                 f"ERROR [2]: No parent for task, ID: {task.id}, Title: {task.title}")
-
             ghost.sub_tasks.append(task)
 
     if ghost.sub_tasks:
@@ -122,7 +121,8 @@ def _find_and_assign_task_to_parent(ghost, parent, task):
         if parent.parent:
             _find_and_assign_task_to_parent(ghost, parent.parent, parent)
     except Exception:
-        print('ERROR[3]:  No parent for task, ID: {task.id}, Title: {task.title}")
+        print(
+            'ERROR[3]:  No parent for task, ID: {task.id}, Title: {task.title}')
         ghost.sub_tasks.append(parent)
 
 
