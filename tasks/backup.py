@@ -38,8 +38,8 @@ def backup(target_list, include):
                                                     include_completed=include_hidden)
             content_unorganised = _serialize_list(l, unorganised_list_of_tasks)
             _backup_to_file("Unorganised_"+l.title, content_unorganised)
-            content = _serialize_list(
-                _organize_tasks(l, unorganised_list_of_tasks))
+            content = _serialize_list(l,
+                                      _organize_tasks(unorganised_list_of_tasks))
             _backup_to_file("Organised_"+l.title, content)
         except Exception:
             print('Failed to add list to backup: {}'.format(l.title))
