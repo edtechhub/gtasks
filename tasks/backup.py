@@ -96,7 +96,7 @@ def _organize_tasks(tasks):
                 children.append(task)
         except Exception:
             print(
-                f"Got error trying to find parent for task with ID: {task.id}, Title: {task.title}. Adding to ghost task.")
+                f"ERROR: No parent for task, ID: {task.id}, Title: {task.title} [ghost task]")
             ghost.sub_tasks.append(task)
 
     for task in children:
@@ -104,6 +104,7 @@ def _organize_tasks(tasks):
             parent = task.parent
             _find_and_assign_task_to_parent(ghost, parent, task)
         except Exception:
+            traceback.print_exc()
             print('FATAL ERROR: Could not find parent for {}'.format(task.title))
             # orphanage.sub_tasks.append(task)
 
@@ -114,7 +115,6 @@ def _organize_tasks(tasks):
 
 
 def _find_and_assign_task_to_parent(ghost, parent, task):
-
     parent.sub_tasks.append(task)
     try:
         if parent.parent:
