@@ -62,7 +62,7 @@ def _serialize_task(task):
         "notes": task.notes,
         "updated": task._dict["updated"],
         "is_completed": task.complete,
-        "sub_tasks": [_serialize_task(sub_task) for sub_task in task.sub_tasks],
+        "sub_tasks": [_serialize_task(sub_task) for sub_task in task.sub_tasks if task.sub_tasks],
         "links": task._dict.get("links", []),
         "due": task._dict.get("due")
     }
