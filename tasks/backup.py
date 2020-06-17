@@ -86,7 +86,6 @@ def _organize_tasks(tasks):
     children = []
 
     ghost = fake_task()
-    #orphanage = fake_task()
 
     for task in tasks:
         task.sub_tasks = []
@@ -103,7 +102,7 @@ def _organize_tasks(tasks):
     for task in children:
         try:
             parent = task.parent
-            _find_and_assign_task_to_parent(parent, task)
+            _find_and_assign_task_to_parent(ghost, parent, task)
         except Exception:
             print('FATAL ERROR: Could not find parent for {}'.format(task.title))
             # orphanage.sub_tasks.append(task)
@@ -114,14 +113,15 @@ def _organize_tasks(tasks):
     return parents
 
 
-def _find_and_assign_task_to_parent(parent, task):
+def _find_and_assign_task_to_parent(ghost, parent, task):
+
     parent.sub_tasks.append(task)
-    if parent.parent:
-        _find_and_assign_task_to_parent(parent.parent, parent)
-    # for t in l:
-    #     _find_and_assign_task_to_parent(t.sub_tasks, parent_id, task)
-    #     if t.id == parent_id:
-    #         t.sub_tasks.append(task)
+    try:
+        if parent.parent:
+            _find_and_assign_task_to_parent(ghost, parent.parent, parent)
+    except Exception:
+        print('ERROR: Could not find parent for {}'.format(task.title))
+        ghost.sub_tasks.append(parent)
 
 
 def _backup_to_file(file_name, backup_content):
