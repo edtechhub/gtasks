@@ -7,6 +7,8 @@ from gtasks import Gtasks
 
 # target_list: List to be backed up
 # include: which tasks to include
+
+
 def backup(target_list, include):
     if include == "all":
         include_hidden = True
@@ -38,8 +40,11 @@ def backup(target_list, include):
 
 
 def _serialize_list(task_list, include_hidden=False):
+    unorganised_list_of_tasks = task_list.get_tasks(include_hidden=include_hidden,
+                            include_completed=include_hidden)
+    _backup_to_file("Temporary_"+l.title, json.dumps(unorganised_list_of_tasks))                
     list_of_tasks = _organize_tasks(
-        task_list.get_tasks(include_hidden=include_hidden, include_completed=include_hidden)
+        unorganised_list_of_tasks
     )
 
     return {
@@ -78,9 +83,10 @@ def fake_task():
 def _organize_tasks(tasks):
     """Shuffles a flat list of tasks into tasks that have a `sub_tasks` property."""
     parents = []
-    orphans = []
+    children = []
 
     ghost = fake_task()
+    #orphanage = fake_task()
 
     for task in tasks:
         task.sub_tasks = []
@@ -88,28 +94,34 @@ def _organize_tasks(tasks):
             if task.parent is None:
                 parents.append(task)
             else:
-                orphans.append(task)
+                children.append(task)
         except Exception:
-            print(f"Got error trying to find parent for task with ID: {task.id}, Title: {task.title}. Adding to ghost task.")
+            print(
+                f"Got error trying to find parent for task with ID: {task.id}, Title: {task.title}. Adding to ghost task.")
             ghost.sub_tasks.append(task)
 
-    def _find_and_assign_task_to_parent(l, parent_id, task):
-        for t in l:
-            _find_and_assign_task_to_parent(t.sub_tasks, parent_id, task)
-            if t.id == parent_id:
-                t.sub_tasks.append(task)
-
-        for task in orphans:
-            try:
-                parent_id = task.parent.id
-                _find_and_assign_task_to_parent(parents, parent_id, task)
-            except Exception:
-                print('Could not find parent for {}'.format(task.title))
+    for task in children:
+        try:
+            parent = task.parent
+            _find_and_assign_task_to_parent(parent, task)
+        except Exception:
+            print('FATAL ERROR: Could not find parent for {}'.format(task.title))
+            # orphanage.sub_tasks.append(task)
 
     if ghost.sub_tasks:
         parents.append(ghost)
 
     return parents
+
+
+def _find_and_assign_task_to_parent(parent, task):
+    parent.sub_tasks.append(task)
+    if parent.parent:
+        _find_and_assign_task_to_parent(parent.parent, parent)
+    # for t in l:
+    #     _find_and_assign_task_to_parent(t.sub_tasks, parent_id, task)
+    #     if t.id == parent_id:
+    #         t.sub_tasks.append(task)
 
 
 def _backup_to_file(file_name, backup_content):
