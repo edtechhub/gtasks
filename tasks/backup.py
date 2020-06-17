@@ -23,7 +23,8 @@ def backup(target_list, include):
         lists = [l for l in lists if l.title.lower() == target_list.lower()]
         new_count = len(lists)
         if not lists:
-            print(f"Could not find any lists with the name '{target_list}' to backup!")
+            print(
+                f"Could not find any lists with the name '{target_list}' to backup!")
             return
         else:
             print(f"Backing up {new_count} of {original_count} lists.")
@@ -41,8 +42,9 @@ def backup(target_list, include):
 
 def _serialize_list(task_list, include_hidden=False):
     unorganised_list_of_tasks = task_list.get_tasks(include_hidden=include_hidden,
-                            include_completed=include_hidden)
-    _backup_to_file("Temporary_"+l.title, json.dumps(unorganised_list_of_tasks))                
+                                                    include_completed=include_hidden)
+    _backup_to_file("Temporary_"+l.title,
+                    json.dumps(unorganised_list_of_tasks))
     list_of_tasks = _organize_tasks(
         unorganised_list_of_tasks
     )
