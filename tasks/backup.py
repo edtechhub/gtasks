@@ -44,7 +44,7 @@ def backup(target_list, include):
 def _serialize_list(task_list, include_hidden=False):
     unorganised_list_of_tasks = task_list.get_tasks(include_hidden=include_hidden,
                                                     include_completed=include_hidden)
-    _backup_to_file("Temporary_"+l.title,
+    _backup_to_file("Temporary_"+task_list.title,
                     json.dumps(unorganised_list_of_tasks))
     list_of_tasks = _organize_tasks(
         unorganised_list_of_tasks
