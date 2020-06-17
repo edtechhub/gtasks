@@ -2,7 +2,7 @@
 from datetime import datetime
 import json
 from unittest.mock import Mock
-
+import traceback
 from gtasks import Gtasks
 
 # target_list: List to be backed up
@@ -38,6 +38,7 @@ def backup(target_list, include):
             _backup_to_file(l.title, content)
         except Exception:
             print('Failed to add list to backup: {}'.format(l.title))
+            traceback.print_exc()
 
 
 def _serialize_list(task_list, include_hidden=False):
