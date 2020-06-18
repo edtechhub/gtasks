@@ -35,22 +35,23 @@ class GTaskWrapper:
 
         self.service = build('tasks', 'v1', credentials=creds)
 
-    def get_lists(self, include_hidden):
+    def get_lists(self):
         # Call the Tasks API
         results = self.service.tasklists().list(
-            maxResults=100, showHidden=include_hidden).execute()
+            maxResults=100).execute()
         all_lists = results.get('items', [])
         while 'nextPageToken' in results:
             results = self.service.tasklists().list(
-                pageToken=results['nextPageToken'], maxResults=100, showHidden=include_hidden).execute()
+                pageToken=results['nextPageToken'], maxResults=100).execute()
             all_lists += results.get('items', [])
         return all_lists
 
-    def get_tasks(self, list_id):
-        results = self.service.tasks().list(maxResults=100, tasklist=list_id).execute()
+    def get_tasks(self, list_id, include_hidden):
+        results = self.service.tasks().list(maxResults=100, tasklist=list_id,
+                                            showHidden=include_hidden).execute()
         all_tasks = results.get('items', [])
         while 'nextPageToken' in results:
             results = self.service.tasks().list(
-                pageToken=results['nextPageToken'], maxResults=100, tasklist=list_id).execute()
+                pageToken=results['nextPageToken'], maxResults=100, tasklist=list_id, showHidden=include_hidden).execute()
             all_tasks += results.get('items', [])
         return all_tasks

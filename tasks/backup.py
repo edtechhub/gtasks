@@ -17,7 +17,7 @@ def backup(target_list, include):
     print(f"Including hidden tasks" if include_hidden else "Not including hidden tasks")
     # if target_list is specified, then modify 'lists'
     g = GTaskWrapper()
-    lists = g.get_lists(include_hidden)
+    lists = g.get_lists()
     if target_list:
         original_count = len(lists)
         lists = [l for l in lists if l['title'].lower() == target_list.lower()]
@@ -34,7 +34,7 @@ def backup(target_list, include):
     for l in lists:
         try:
             print(f"Adding list to backup: {l['title']}")
-            unorganised_list_of_tasks = g.get_tasks(l['id'])
+            unorganised_list_of_tasks = g.get_tasks(l['id'], include_hidden)
             content_unorganised = _serialize_list(l, unorganised_list_of_tasks)
             _backup_to_file("Unorganised_" + l['title'], content_unorganised)
 
@@ -52,6 +52,19 @@ def _serialize_list(task_list, list_of_tasks):
         "title": task_list['title'],
         "updated": task_list["updated"],
         "tasks": list_of_tasks
+    }
+
+
+def _serialize_task(task):
+    return {
+        "id": task.id,
+        "title": task.title,
+        "notes": task.notes,
+        "updated": task._dict["updated"],
+        "is_completed": task.complete,
+        "sub_tasks": [_serialize_task(sub_task) for sub_task in task.sub_tasks] if hasattr(task, 'sub_tasks') else None,
+        "links": task._dict.get("links", []),
+        "due": task._dict.get("due")
     }
 
 
