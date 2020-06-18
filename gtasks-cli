@@ -2,7 +2,6 @@
 """Main script to act as an entry point and parse any args."""
 import argparse
 
-from tasks.authenticate import authenticate
 from tasks.backup import backup
 from tasks.process import process
 from tasks.quick_add import quick_add

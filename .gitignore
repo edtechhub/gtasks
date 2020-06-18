@@ -130,3 +130,5 @@ dmypy.json
 
 # project
 backup*.json
+credentials.json
+token.pickle

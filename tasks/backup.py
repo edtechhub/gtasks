@@ -3,7 +3,7 @@ from datetime import datetime
 import json
 from unittest.mock import Mock
 import traceback
-from gtasks import Gtasks
+from .gtask_wrapper import GTaskWrapper
 
 # target_list: List to be backed up
 # include: which tasks to include
@@ -16,11 +16,11 @@ def backup(target_list, include):
         include_hidden = False
     print(f"Including hidden tasks" if include_hidden else "Not including hidden tasks")
     # if target_list is specified, then modify 'lists'
-    g = Gtasks()
-    lists = g.get_lists()
+    g = GTaskWrapper()
+    lists = g.get_lists(include_hidden)
     if target_list:
         original_count = len(lists)
-        lists = [l for l in lists if l.title.lower() == target_list.lower()]
+        lists = [l for l in lists if l['title'].lower() == target_list.lower()]
         new_count = len(lists)
         if not lists:
             print(
@@ -33,97 +33,65 @@ def backup(target_list, include):
     # Get content for each list.new_count} of {original_count} lists.")
     for l in lists:
         try:
-            print(f"Adding list to backup: {l.title}")
-            unorganised_list_of_tasks = l.get_tasks(include_hidden=include_hidden,
-                                                    include_completed=include_hidden)
+            print(f"Adding list to backup: {l['title']}")
+            unorganised_list_of_tasks = g.get_tasks(l['id'])
             content_unorganised = _serialize_list(l, unorganised_list_of_tasks)
-            _backup_to_file("Unorganised_"+l.title, content_unorganised)
-            content = _serialize_list(l,
-                                      _organize_tasks(unorganised_list_of_tasks))
-            _backup_to_file("Organised_"+l.title, content)
+            _backup_to_file("Unorganised_" + l['title'], content_unorganised)
+
+            content = _serialize_list(
+                l, _organize_tasks(unorganised_list_of_tasks))
+            _backup_to_file("Organised_" + l['title'], content)
         except Exception:
-            print('Failed to add list to backup: {}'.format(l.title))
+            print('Failed to add list to backup: {}'.format(l['title']))
             traceback.print_exc()
 
 
 def _serialize_list(task_list, list_of_tasks):
     return {
-        "id": task_list.id,
-        "title": task_list.title,
-        "updated": task_list._dict["updated"],
-        "tasks": [_serialize_task(task) for task in list_of_tasks],
-    }
-
-
-def _serialize_task(task):
-    return {
-        "id": task.id,
-        "title": task.title,
-        "notes": task.notes,
-        "updated": task._dict["updated"],
-        "is_completed": task.complete,
-        "sub_tasks": [_serialize_task(sub_task) for sub_task in task.sub_tasks] if hasattr(task, 'sub_tasks') else None,
-        "links": task._dict.get("links", []),
-        "due": task._dict.get("due")
+        "id": task_list['id'],
+        "title": task_list['title'],
+        "updated": task_list["updated"],
+        "tasks": list_of_tasks
     }
 
 
 def fake_task():
-    t = Mock()
-    t.id = "ghost"
-    t.title = "ghost"
-    t.notes = "ghost notes"
-    t.complete = False
-    t.sub_tasks = []
-
-    t._dict = {"updated": "ghost"}
+    t = {
+        'id': "ghost",
+        'title': "ghost",
+        'notes': "ghost notes",
+        'sub_tasks': [],
+        "updated": "ghost"}
     return t
 
 
 def _organize_tasks(tasks):
     """Shuffles a flat list of tasks into tasks that have a `sub_tasks` property."""
-    parents = []
-    children = []
+    task_map = {}
+    for task in tasks:
+        task_map[task['id']] = task
 
     ghost = fake_task()
 
     for task in tasks:
-        task.sub_tasks = []
-        try:
-            if task.parent is None:
-                parents.append(task)
-            else:
-                children.append(task)
-        except Exception:
-            print(
-                f"ERROR [1]: No parent for task, ID: {task.id}, Title: {task.title}")
-            ghost.sub_tasks.append(task)
+        parent_id = task.get('parent', None)
+        if parent_id and task_map[parent_id]:
+            if 'sub_tasks' not in task_map[parent_id]:
+                task_map[parent_id]['sub_tasks'] = []
+            task_map[parent_id]['sub_tasks'].append(task)
+            del task_map[task['id']]
+        elif parent_id:
+            ghost['sub_tasks'].append(task)
+            del task_map[task['id']]
 
-    for task in children:
-        try:
-            parent = task.parent
-            _find_and_assign_task_to_parent(ghost, parent, task)
-        except Exception:
-            traceback.print_exc()
-            print(
-                f"ERROR [2]: No parent for task, ID: {task.id}, Title: {task.title}")
-            ghost.sub_tasks.append(task)
+    organized = []
+    for _, value in task_map.items():
+        organized.append(value)
 
-    if ghost.sub_tasks:
-        parents.append(ghost)
+    if len(ghost['sub_tasks']):
+        organized.append(ghost)
 
-    return parents
-
-
-def _find_and_assign_task_to_parent(ghost, parent, task):
-    parent.sub_tasks.append(task)
-    try:
-        if parent.parent:
-            _find_and_assign_task_to_parent(ghost, parent.parent, parent)
-    except Exception:
-        print(
-            'ERROR[3]:  No parent for task, ID: {task.id}, Title: {task.title}')
-        ghost.sub_tasks.append(parent)
+    return organized
 
 
 def _backup_to_file(file_name, backup_content):
