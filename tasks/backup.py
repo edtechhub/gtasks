@@ -55,6 +55,19 @@ def _serialize_list(task_list, list_of_tasks):
     }
 
 
+def _serialize_task(task):
+    return {
+        "id": task.id,
+        "title": task.title,
+        "notes": task.notes,
+        "updated": task._dict["updated"],
+        "is_completed": task.complete,
+        "sub_tasks": [_serialize_task(sub_task) for sub_task in task.sub_tasks],
+        "links": task._dict.get("links", []),
+        "due": task._dict.get("due")
+    }
+
+
 def fake_task():
     t = {
         'id': "ghost",
