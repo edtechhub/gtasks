@@ -88,7 +88,7 @@ def _organize_tasks(tasks):
 
     for task in tasks:
         parent_id = task.get('parent', None)
-        if parent_id and task_map[parent_id]:
+        if parent_id and parent_id in task_map:
             if 'sub_tasks' not in task_map[parent_id]:
                 task_map[parent_id]['sub_tasks'] = []
             task_map[parent_id]['sub_tasks'].append(task)
